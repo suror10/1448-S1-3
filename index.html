@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الصفحة الرئيسية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header-logo {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            animation: float 6s ease-in-out infinite;
+        }
+        .header-logo img {
+            width: 140px;
+            height: auto;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 50px 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-container h1 {
+            color: #1a252f;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .main-container p {
+            color: #5c6a79;
+            margin-bottom: 40px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 16px 30px;
+            font-size: 20px;
+            font-weight: 700;
+            text-decoration: none;
+            color: #ffffff;
+            border-radius: 16px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-quran {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            box-shadow: 0 8px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-report {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            box-shadow: 0 8px 15px rgba(41, 128, 185, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+        
+        .btn-quran:hover {
+            box-shadow: 0 15px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-report:hover {
+            box-shadow: 0 15px 20px rgba(41, 128, 185, 0.4);
+        }
+
+        .btn-icon {
+            font-size: 26px;
+        }
+
+        @media (max-width: 480px) {
+            .header-logo {
+                top: 20px;
+                right: 20px;
+            }
+            .header-logo img { width: 100px; }
+            .main-container { padding: 40px 20px; }
+            .main-container h1 { font-size: 26px; }
+            .btn { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-logo">
+        <img src="img/شعار_السرور_ازرق_جاهز_للصق-removebg-preview.png" alt="شعار النظام">
+    </div>
+
+    <div class="main-container">
+        <h1>الصفحة الرئيسية</h1>
+        
+        <div class="buttons-container">
+            <a href="weeb/index.html" class="btn btn-quran">
+                <span class="btn-icon">📖</span>
+                <span>الخطة القرآنية</span>
+            </a>
+            
+            <a href="MonthRe/index.html" class="btn btn-report">
+                <span class="btn-icon">📊</span>
+                <span>التقارير الشهرية</span>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام البحث - الحفظ والمراجعة الأسبوعي</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <header class="header">
+      <h2>الخطة القرآنية</h2>
+
+    </header>
+
+    <div id="networkBadge" class="network-badge" style="display: none;"></div>
+
+    <div class="search-box">
+      <select id="searchInput" onchange="if(this.value !== '') handleSearch()">
+        <option value="">⏳ جاري تحميل الأسماء...</option>
+      </select>
+      <button id="searchBtn" onclick="handleSearch()">بحث 🔍</button>
+    </div>
+
+    <div id="filterContainer" class="filter-container" style="display: none;">
+      <label for="weekSelect"><b>تصفية الأسبوع:</b></label>
+      <select id="weekSelect" onchange="filterWeeks()">
+        <option value="all">عرض جميع الأسابيع</option>
+      </select>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+    <div id="weeksContainer" class="weeks-container"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

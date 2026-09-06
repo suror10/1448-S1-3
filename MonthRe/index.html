@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> التقارير الشهرية</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --current-gold: #f59e0b;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+    
+    #offline-banner {
+      display: none;
+      background-color: #ef4444;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      animation: fadeIn 0.5s;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .current-month-banner {
+      display: none;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      color: #92400e;
+      border: 1px solid #f59e0b;
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    input[type="text"] {
+      padding: 12px 20px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      width: 300px;
+      max-width: 100%;
+      outline: none;
+      transition: border 0.3s;
+    }
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    #loading {
+      text-align: center;
+      display: none;
+      font-size: 18px;
+      color: var(--primary);
+      font-weight: bold;
+    }
+    #errorMsg {
+      color: #dc2626;
+      background: #fee2e2;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      display: none;
+      margin-bottom: 20px;
+    }
+    
+    .month-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border-top: 5px solid var(--primary);
+    }
+    .month-card.active-month {
+      border: 2px solid var(--current-gold);
+      border-top: 6px solid var(--current-gold);
+    }
+    .current-badge {
+      background-color: var(--current-gold);
+      color: white;
+      font-size: 13px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    .month-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: var(--primary);
+      border-bottom: 2px solid #f3f4f6;
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .section {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .section h3 {
+      margin-top: 0;
+      color: #334155;
+      font-size: 18px;
+      border-bottom: 1px dashed #cbd5e1;
+      padding-bottom: 5px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+    .perc {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .good { color: #16a34a; }
+    .bad { color: #dc2626; }
+    .final-score {
+      font-size: 24px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div id="offline-banner">⚠️ أنت غير متصل بالإنترنت حالياً. يتم عرض أحدث بيانات محفوظة.</div>
+
+  <div class="header">
+    <h1>📊  التقارير الشهرية</h1>
+    <p>أدخل اسم الطالب لعرض تفاصيل الحضور، الحفظ، والمراجعة</p>
+  </div>
+
+  <div id="currentMonthBanner" class="current-month-banner">
+    📌 الشهر الحالي النشط: <span id="currentMonthText"></span>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="studentName" placeholder="اكتب اسم الطالب هنا..." onkeypress="handleEnter(event)">
+    <button onclick="searchStudent()">بحث واستخراج</button>
+  </div>
+
+  <div id="loading">⏳ جارٍ البحث...</div>
+  <div id="errorMsg"></div>
+  <div id="results"></div>
+</div>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('تم تسجيل Service Worker بنجاح!', reg))
+        .catch(err => console.error('فشل تسجيل Service Worker:', err));
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const lastStudent = localStorage.getItem('lastSearchedStudent');
+    if (lastStudent) {
+      document.getElementById('studentName').value = lastStudent;
+      searchStudent(); 
+    }
+  });
+
+  window.addEventListener('offline', () => {
+    document.getElementById('offline-banner').style.display = 'block';
+  });
+
+  window.addEventListener('online', () => {
+    document.getElementById('offline-banner').style.display = 'none';
+    const lastStudent = localStorage.getItem('lastSearchedStudent');
+    if (lastStudent) {
+      document.getElementById('studentName').value = lastStudent;
+      searchStudent();
+    }
+  });
+
+  if (!navigator.onLine) {
+    document.getElementById('offline-banner').style.display = 'block';
+  }
+
+  function handleEnter(e) {
+    if (e.key === 'Enter') searchStudent();
+  }
+
+  function getColorClass(percentage) {
+    return percentage >= 80 ? 'good' : (percentage < 50 ? 'bad' : '');
+  }
+
+  function searchStudent() {
+    const name = document.getElementById('studentName').value.trim();
+    if (!name) return;
+
+    localStorage.setItem('lastSearchedStudent', name);
+
+    if (!navigator.onLine) {
+      const cachedResponse = localStorage.getItem('reportData_' + name);
+      if (cachedResponse) {
+        const response = JSON.parse(cachedResponse);
+        showData(response);
+      } else {
+        showError("لا يوجد إنترنت، ولم يتم العثور على بيانات محفوظة لهذا الطالب مسبقاً.");
+      }
+      return;
+    }
+
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('results').innerHTML = '';
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('currentMonthBanner').style.display = 'none';
+
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzevwIlJTjItu0Xb5kDcWaRSDCfgOkbfUE9RkXE14rDg7skfqgjbOMT9202nL0MgCm4/exec";
+
+    fetch(WEB_APP_URL + "?name=" + encodeURIComponent(name))
+      .then(response => response.json())
+      .then(response => {
+        document.getElementById('loading').style.display = 'none';
+        
+        if (response.error) {
+          showError(response.error);
+          return;
+        }
+
+        localStorage.setItem('reportData_' + name, JSON.stringify(response));
+        showData(response);
+      })
+      .catch(error => {
+        document.getElementById('loading').style.display = 'none';
+        showError("حدث خطأ في الاتصال: " + error.message);
+      });
+  }
+
+  function showError(msg) {
+    document.getElementById('errorMsg').innerText = msg;
+    document.getElementById('errorMsg').style.display = 'block';
+  }
+
+  function showData(response) {
+    if (response.currentMonth) {
+      document.getElementById('currentMonthText').innerText = "الشهر " + response.currentMonth;
+      document.getElementById('currentMonthBanner').style.display = 'block';
+    }
+    renderReports(response.data);
+  }
+
+  function renderReports(months) {
+    const container = document.getElementById('results');
+    let html = '';
+
+    months.forEach(month => {
+      const activeClass = month.isCurrentMonth ? 'active-month' : '';
+      const currentBadge = month.isCurrentMonth ? '<span class="current-badge">🌟 الشهر الحالي</span>' : '';
+
+      html += `
+        <div class="month-card ${activeClass}">
+          <div class="month-title">
+            <span>📅 تقرير الشهر ${month.monthNumber} ${currentBadge}</span>
+            <span class="final-score ${getColorClass(month.finalPercentage)}">النسبة النهائية: ${month.finalPercentage}%</span>
+          </div>
+          
+          <div class="grid">
+            <div class="section">
+              <h3>⏱️ الحضور والغياب</h3>
+              <div class="row"><span>الأيام المطلوب حضورها:</span> <b>${month.attendance.totalRequired}</b></div>
+              <div class="row"><span>أيام الحضور الفعلية:</span> <b>${month.attendance.attended}</b></div>
+              <div class="row"><span>غياب (بعذر):</span> <b>${month.attendance.excused}</b></div>
+              <div class="row"><span>غياب (بدون عذر):</span> <b>${month.attendance.unexcused}</b></div>
+              <div class="row" style="margin-top:10px;">
+                <span>نسبة الحضور:</span> 
+                <b class="perc ${getColorClass(month.attendance.percentage)}">${month.attendance.percentage}%</b>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>📖 الحفظ</h3>
+              <div class="row"><span>الصفحات المطلوبة:</span> <b>${month.memorization.required}</b></div>
+              <div class="row"><span>الصفحات المُسمّعة:</span> <b>${month.memorization.done}</b></div>
+              <div class="row" style="margin-top:10px;">
+                <span>نسبة الإنجاز:</span> 
+                <b class="perc ${getColorClass(month.memorization.percentage)}">${month.memorization.percentage}%</b>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>🔄 المراجعة</h3>
+              <div class="row"><span>الصفحات المطلوبة:</span> <b>${month.revision.required}</b></div>
+              <div class="row"><span>الصفحات المُراجَعة:</span> <b>${month.revision.done}</b></div>
+              <div class="row" style="margin-top:10px;">
+                <span>نسبة الإنجاز:</span> 
+                <b class="perc ${getColorClass(month.revision.percentage)}">${month.revision.percentage}%</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+</script>
+
+</body>
+</html>
