@@ -190,8 +190,11 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="studentName" placeholder="اكتب اسم الطالب هنا..." onkeypress="handleEnter(event)">
-    <button onclick="searchStudent()">بحث واستخراج</button>
+    <select id="studentName">
+      <option value="">⏳ جاري تحميل الأسماء...</option>
+    </select>
+    <input type="password" id="studentPassword" placeholder="كلمة المرور" onkeypress="handleEnter(event)">
+    <button onclick="loginAndSearch()">تسجيل الدخول</button>
   </div>
 
   <div id="loading">⏳ جارٍ البحث...</div>
@@ -200,6 +203,9 @@
 </div>
 
 <script>
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzevwIlJTjItu0Xb5kDcWaRSDCfgOkbfUE9RkXE14rDg7skfqgjbOMT9202nL0MgCm4/exec";
+
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
@@ -208,13 +214,58 @@
     });
   }
 
+
   window.addEventListener('DOMContentLoaded', () => {
-    const lastStudent = localStorage.getItem('lastSearchedStudent');
-    if (lastStudent) {
-      document.getElementById('studentName').value = lastStudent;
-      searchStudent(); 
-    }
+    loadStudentNames();
   });
+
+  function loadStudentNames() {
+    const select = document.getElementById('studentName');
+    
+
+    if (!navigator.onLine) {
+      const cachedNames = localStorage.getItem('studentNamesList');
+      if (cachedNames) {
+        populateNames(JSON.parse(cachedNames));
+      } else {
+        select.innerHTML = '<option value="">❌ لا يوجد اتصال بالإنترنت</option>';
+      }
+      return;
+    }
+
+
+    fetch(WEB_APP_URL + "?action=getNames")
+      .then(res => res.json())
+      .then(data => {
+        if (data.names) {
+          localStorage.setItem('studentNamesList', JSON.stringify(data.names));
+          populateNames(data.names);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        const cachedNames = localStorage.getItem('studentNamesList');
+        if (cachedNames) populateNames(JSON.parse(cachedNames));
+      });
+  }
+
+  function populateNames(names) {
+    const select = document.getElementById('studentName');
+    if (names.length > 0) {
+      select.innerHTML = '<option value="">اختر اسمك من القائمة...</option>';
+      names.forEach(name => {
+        select.innerHTML += `<option value="${name}">${name}</option>`;
+      });
+
+      const lastStudent = localStorage.getItem('lastSearchedStudent');
+      if (lastStudent && names.includes(lastStudent)) {
+        select.value = lastStudent;
+      }
+    } else {
+      select.innerHTML = '<option value="">❌ لا توجد أسماء متاحة</option>';
+    }
+  }
+
 
   window.addEventListener('offline', () => {
     document.getElementById('offline-banner').style.display = 'block';
@@ -222,11 +273,7 @@
 
   window.addEventListener('online', () => {
     document.getElementById('offline-banner').style.display = 'none';
-    const lastStudent = localStorage.getItem('lastSearchedStudent');
-    if (lastStudent) {
-      document.getElementById('studentName').value = lastStudent;
-      searchStudent();
-    }
+    loadStudentNames();
   });
 
   if (!navigator.onLine) {
@@ -234,18 +281,25 @@
   }
 
   function handleEnter(e) {
-    if (e.key === 'Enter') searchStudent();
+    if (e.key === 'Enter') loginAndSearch();
   }
 
   function getColorClass(percentage) {
     return percentage >= 80 ? 'good' : (percentage < 50 ? 'bad' : '');
   }
 
-  function searchStudent() {
-    const name = document.getElementById('studentName').value.trim();
-    if (!name) return;
+
+  function loginAndSearch() {
+    const name = document.getElementById('studentName').value;
+    const password = document.getElementById('studentPassword').value.trim();
+    
+    if (!name || !password) {
+      showError("الرجاء اختيار الاسم وإدخال كلمة المرور!");
+      return;
+    }
 
     localStorage.setItem('lastSearchedStudent', name);
+
 
     if (!navigator.onLine) {
       const cachedResponse = localStorage.getItem('reportData_' + name);
@@ -263,9 +317,8 @@
     document.getElementById('errorMsg').style.display = 'none';
     document.getElementById('currentMonthBanner').style.display = 'none';
 
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzevwIlJTjItu0Xb5kDcWaRSDCfgOkbfUE9RkXE14rDg7skfqgjbOMT9202nL0MgCm4/exec";
-
-    fetch(WEB_APP_URL + "?name=" + encodeURIComponent(name))
+    // نداء السيرفر بالاسم وكلمة المرور
+    fetch(`${WEB_APP_URL}?name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`)
       .then(response => response.json())
       .then(response => {
         document.getElementById('loading').style.display = 'none';
