@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> التقارير الشهرية</title>
+  <title>التقارير الشهرية</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -63,7 +63,7 @@
       margin-bottom: 30px;
       flex-wrap: wrap;
     }
-    input[type="text"] {
+    input[type="text"], input[type="password"], select {
       padding: 12px 20px;
       font-size: 16px;
       border: 2px solid #ddd;
@@ -73,7 +73,7 @@
       outline: none;
       transition: border 0.3s;
     }
-    input[type="text"]:focus {
+    input:focus, select:focus {
       border-color: var(--primary);
     }
     button {
@@ -138,6 +138,7 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
+      gap: 10px;
     }
     .grid {
       display: grid;
@@ -160,17 +161,23 @@
     .row {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 8px;
       font-size: 15px;
     }
     .perc {
       font-weight: bold;
-      font-size: 18px;
+      font-size: 17px;
+    }
+    .grade-badge {
+      font-size: 14px;
+      font-weight: 600;
+      margin-right: 4px;
     }
     .good { color: #16a34a; }
     .bad { color: #dc2626; }
     .final-score {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: bold;
     }
   </style>
@@ -181,7 +188,7 @@
   <div id="offline-banner">⚠️ أنت غير متصل بالإنترنت حالياً. يتم عرض أحدث بيانات محفوظة.</div>
 
   <div class="header">
-    <h1>📊  التقارير الشهرية</h1>
+    <h1>📊 التقارير الشهرية</h1>
     <p>أدخل اسم الطالب لعرض تفاصيل الحضور، الحفظ، والمراجعة</p>
   </div>
 
@@ -205,7 +212,6 @@
 <script>
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzevwIlJTjItu0Xb5kDcWaRSDCfgOkbfUE9RkXE14rDg7skfqgjbOMT9202nL0MgCm4/exec";
 
-
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
@@ -214,14 +220,12 @@
     });
   }
 
-
   window.addEventListener('DOMContentLoaded', () => {
     loadStudentNames();
   });
 
   function loadStudentNames() {
     const select = document.getElementById('studentName');
-    
 
     if (!navigator.onLine) {
       const cachedNames = localStorage.getItem('studentNamesList');
@@ -232,7 +236,6 @@
       }
       return;
     }
-
 
     fetch(WEB_APP_URL + "?action=getNames")
       .then(res => res.json())
@@ -266,7 +269,6 @@
     }
   }
 
-
   window.addEventListener('offline', () => {
     document.getElementById('offline-banner').style.display = 'block';
   });
@@ -284,10 +286,21 @@
     if (e.key === 'Enter') loginAndSearch();
   }
 
-  function getColorClass(percentage) {
-    return percentage >= 80 ? 'good' : (percentage < 50 ? 'bad' : '');
+  // دالة تحديد التقدير بحسب النسبة المئوية
+  function getGrade(percentage) {
+    const p = parseFloat(percentage);
+    if (isNaN(p)) return '';
+    if (p > 100) return 'ممتاز جداً';
+    if (p >= 90)  return 'ممتاز';
+    if (p >= 80)  return 'جيد جداً';
+    if (p >= 70)  return 'جيد';
+    if (p >= 60)  return 'مقبول';
+    return 'لم ينجز';
   }
 
+  function getColorClass(percentage) {
+    return percentage >= 80 ? 'good' : (percentage < 60 ? 'bad' : '');
+  }
 
   function loginAndSearch() {
     const name = document.getElementById('studentName').value;
@@ -299,7 +312,6 @@
     }
 
     localStorage.setItem('lastSearchedStudent', name);
-
 
     if (!navigator.onLine) {
       const cachedResponse = localStorage.getItem('reportData_' + name);
@@ -317,7 +329,6 @@
     document.getElementById('errorMsg').style.display = 'none';
     document.getElementById('currentMonthBanner').style.display = 'none';
 
-    // نداء السيرفر بالاسم وكلمة المرور
     fetch(`${WEB_APP_URL}?name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`)
       .then(response => response.json())
       .then(response => {
@@ -362,7 +373,9 @@
         <div class="month-card ${activeClass}">
           <div class="month-title">
             <span>📅 تقرير الشهر ${month.monthNumber} ${currentBadge}</span>
-            <span class="final-score ${getColorClass(month.finalPercentage)}">النسبة النهائية: ${month.finalPercentage}%</span>
+            <span class="final-score ${getColorClass(month.finalPercentage)}">
+              النسبة النهائية: ${month.finalPercentage}% <span class="grade-badge">(${getGrade(month.finalPercentage)})</span>
+            </span>
           </div>
           
           <div class="grid">
@@ -374,7 +387,9 @@
               <div class="row"><span>غياب (بدون عذر):</span> <b>${month.attendance.unexcused}</b></div>
               <div class="row" style="margin-top:10px;">
                 <span>نسبة الحضور:</span> 
-                <b class="perc ${getColorClass(month.attendance.percentage)}">${month.attendance.percentage}%</b>
+                <b class="perc ${getColorClass(month.attendance.percentage)}">
+                  ${month.attendance.percentage}% <span class="grade-badge">(${getGrade(month.attendance.percentage)})</span>
+                </b>
               </div>
             </div>
 
@@ -384,7 +399,9 @@
               <div class="row"><span>الصفحات المُسمّعة:</span> <b>${month.memorization.done}</b></div>
               <div class="row" style="margin-top:10px;">
                 <span>نسبة الإنجاز:</span> 
-                <b class="perc ${getColorClass(month.memorization.percentage)}">${month.memorization.percentage}%</b>
+                <b class="perc ${getColorClass(month.memorization.percentage)}">
+                  ${month.memorization.percentage}% <span class="grade-badge">(${getGrade(month.memorization.percentage)})</span>
+                </b>
               </div>
             </div>
 
@@ -394,7 +411,9 @@
               <div class="row"><span>الصفحات المُراجَعة:</span> <b>${month.revision.done}</b></div>
               <div class="row" style="margin-top:10px;">
                 <span>نسبة الإنجاز:</span> 
-                <b class="perc ${getColorClass(month.revision.percentage)}">${month.revision.percentage}%</b>
+                <b class="perc ${getColorClass(month.revision.percentage)}">
+                  ${month.revision.percentage}% <span class="grade-badge">(${getGrade(month.revision.percentage)})</span>
+                </b>
               </div>
             </div>
           </div>
