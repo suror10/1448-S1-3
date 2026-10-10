@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbz9EfJazVaL7jk7W9ccFxYeIInuN8PLiplJiQ3x3DWC0jg50ts04aejjacjVJ3lfrsZxA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbydaGi4o6lyFKh_tdLjMBwLQFTDg3pzOYGbht-P4qppCICayNoAn3EpSsU1dgdUEe0m/exec";
 let allWeeksData = []; 
 let currentWeekNumber = 1;
 
