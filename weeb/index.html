@@ -3,31 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام البحث - الحفظ والمراجعة الأسبوعي</title>
+  <title>نظام البحث - الحفظ والمراجعة الأسبوعي | حلقة علي بن أبي طالب</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div class="app-container">
     <header class="header">
-      <h2>الخطة القرآنية</h2>
-
+      <h2>📖 الخطة القرآنية الأسبوعية</h2>
+      <p>حلقة علي بن أبي طالب - متابعة الحفظ والمراجعة</p>
     </header>
 
     <div id="networkBadge" class="network-badge" style="display: none;"></div>
 
     <div class="search-box">
+      <input type="text" id="quickFilterInput" class="quick-search-input" placeholder="ابحث عن اسم الطالب سريعاً..." oninput="filterStudentOptions()">
       <select id="searchInput" onchange="if(this.value !== '') handleSearch()">
         <option value="">⏳ جاري تحميل الأسماء...</option>
       </select>
       <button id="searchBtn" onclick="handleSearch()">بحث 🔍</button>
+      <button id="refreshCacheBtn" type="button" onclick="clearSavedCacheAndReload()" title="مسح البيانات القديمة المحفوظة في المتصفح وتحديث الأسماء" style="background:#0f172a;color:#fff;border:none;border-radius:8px;padding:11px 14px;cursor:pointer;font-weight:bold;">تحديث الأسماء 🔄</button>
     </div>
 
+    <div id="studentSummaryBar" class="student-summary-bar"></div>
+
     <div id="filterContainer" class="filter-container" style="display: none;">
-      <label for="weekSelect"><b>تصفية الأسبوع:</b></label>
-      <select id="weekSelect" onchange="filterWeeks()">
-        <option value="all">عرض جميع الأسابيع</option>
-      </select>
+      <div class="filter-group">
+        <label for="weekSelect"><b>تصفية الأسبوع:</b></label>
+        <select id="weekSelect" onchange="filterWeeks()">
+          <option value="all">عرض جميع الأسابيع (20 أسبوعاً)</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>
+          <input type="checkbox" id="hideEmptyWeeksToggle" onchange="filterWeeks()">
+          إخفاء الأسابيع الفارغة
+        </label>
+      </div>
     </div>
 
     <div id="statusMessage" class="status-message"></div>
